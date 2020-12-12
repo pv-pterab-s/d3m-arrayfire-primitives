@@ -19,9 +19,21 @@ def read_package_variable(key):
 
 
 def install_arrayfire():
+    arrayfire_version = '3.6.2'
+    arrayfire_filename = f'ArrayFire-v{arrayfire_version}_Linux_x86_64.sh'
+
     check_call('mkdir -p /opt/arrayfire'.split())
-    check_call('wget -P /tmp https://arrayfire.s3.amazonaws.com/3.6.4/ArrayFire-v3.6.4_Linux_x86_64.sh'.split())
-    check_call('bash /tmp/ArrayFire-v3.6.4_Linux_x86_64.sh --skip-license --prefix=/opt/arrayfire'.split())
+
+    arrayfire_predownloaded_filename = os.path.join('/mnt', 'd3m', arrayfire_filename)
+    if os.path.exists(arrayfire_predownloaded_filename):
+        arrayfire_downloaded_filename = arrayfire_predownloaded_filename
+    else:
+        arrayfire_downloaded_filename = os.path.join('/tmp', arrayfire_filename)
+        check_call((f'wget -P /tmp https://arrayfire.s3.amazonaws.com/{arrayfire_version}/ArrayFire-v{arrayfire_version}_Linux_x86_64.sh').split())
+    check_call((f'bash {arrayfire_downloaded_filename} --skip-license --prefix=/opt/arrayfire').split())
+
+    check_call(['bash', '-c', 'echo \'export LD_LIBRARY_PATH=/opt/arrayfire/lib64:$LD_LIBRARY_PATH\' >> ~/.bashrc'])
+    check_call(['bash', '-c', 'echo \'export LD_PRELOAD=/usr/local/lib/libmkl_core.so:/usr/local/lib/libmkl_sequential.so\' >> ~/.bashrc'])
 
 
 class PostDevelopStep(develop):
@@ -44,7 +56,8 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'arrayfire==3.6.20181017',
-        'd3m==2019.11.10'
+        'd3m==2019.11.10',
+        'mkl==2021.1.1'
     ],
     url='https://github.com/arrayfire/d3m-arrayfire-primitives',
     keywords='d3m_primitive',
