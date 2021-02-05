@@ -25,6 +25,7 @@ setup(
     author=read_package_variable('__author__'),
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
+        'af-scikit-learn',
         'arrayfire==3.6.20181017',
         'd3m==2019.11.10',
         'mkl==2021.1.1'
